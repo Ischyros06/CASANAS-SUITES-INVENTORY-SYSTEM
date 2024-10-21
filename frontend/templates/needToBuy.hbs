@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Need to Buy</title>
+    <title>Restock List</title>
     <link rel="stylesheet" href="/needToBuy.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
     <header>
         <nav class="navbar">
             <div class="brand">
-                <a href="/goHomeAdmin" style="font-family: 'Roboto', sans-serif;">Stack Inventory - ADMIN : Need to Buy</a>
+                <a href="/goHomeAdmin" style="font-family: 'Roboto', sans-serif;">Stack Inventory - ADMIN : Restock List</a>
             </div>
             <ul class="navbar-menu">
                 <li>Welcome, <strong style="color: #4C43A2;">{{admin.name}}</strong></li>
@@ -28,27 +28,41 @@
             <li><a href="/status">Status</a></li>
             <li><a href="/report">Reports</a></li>
             <li><a href="/changeLog">Change logs</a></li>
-            <li><a href="/needToBuy">Need to Buy</a></li>
+            <li><a href="/needToBuy">Restock List</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </aside>
 
     <main>
+        <!-- Print header appears on the first page only -->
+        <div class="print-header first-page-only">
+            <div class="header-content">
+                <img src="Casanas Suites.png" alt="Company Logo" class="logo">
+                <div class="text-content">
+                    <h1>Casanas Suites</h1>
+                    <h2>Restock List</h2>
+                    <p>For Internal Use | Location: C Castro Road, Brgy. San Pedro, Puerto Princesa City, Palawan</p>
+                    <p id="print-datetime"></p>
+                </div>
+            </div>
+        </div>
+
         <div class="item-container">
             <button onclick="window.print()">Print Report</button>
 
-            <table>
+            <table class="table-display">
                 <thead>
                     <tr>
+                        <th>ID number</th>
                         <th>Product</th>
                         <th>Unit</th>
                         <th>Quantity Needed</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {{#each reportData}}
                         <tr>
+                            <td>{{this.id}}</td>
                             <td>{{this.product}}</td>
                             <td>{{this.unit}}</td>
                             <td>{{this.difference}}</td>
@@ -58,5 +72,10 @@
             </table>
         </div>
     </main>
+    
+    <script>
+        // Add current date and time to the print header
+        document.getElementById('print-datetime').textContent = `Printed on: ${new Date().toLocaleString()}`;
+    </script>
 </body>
 </html>

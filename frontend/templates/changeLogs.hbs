@@ -28,7 +28,7 @@
             <li><a href="/status">Status</a></li>
             <li><a href="/report">Reports</a></li>
             <li><a href="/changeLog">Change logs</a></li>
-            <li><a href="/needToBuy">Need to Buy</a></li>
+            <li><a href="/needToBuy">Restock List</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </aside>
@@ -47,20 +47,23 @@
                     <p><strong>Date:</strong> {{this.createdAt}}</p>
                     <p><strong>Account:</strong> {{this.userName}}</p>
                     <p><strong>Action:</strong> {{this.action}}</p>
+                    {{#if this.productId}}
+                        <p><strong>Product ID:</strong> <span class="product-id">{{this.productId}}</span></p>
+                    {{/if}}
                     {{#if this.product}}
                         <p><strong>Product:</strong> {{this.product}}</p>
                     {{/if}}
-                    {{#if this.count}}
-                        <p><strong>Count:</strong> {{this.count}}</p>
+                    {{#if this.amount}}
+                        <p><strong>Amount:</strong> {{this.amount}}</p>
                     {{/if}}
                     {{#if this.maxLimit}}
                         <p><strong>Set Limit:</strong> {{this.maxLimit}}</p>
                     {{/if}}
                     {{#if this.unit}}
-                        <p><strong>Set Limit:</strong> {{this.unit}}</p>
+                        <p><strong>Unit:</strong> {{this.unit}}</p>
                     {{/if}}
                     {{#if this.category}}
-                        <p><strong>Set Limit:</strong> {{this.category}}</p>
+                        <p><strong>Category:</strong> {{this.category}}</p>
                     {{/if}}
                 </div>
             {{/each}}
@@ -68,6 +71,10 @@
     </main>
 
     <script>
+        document.querySelectorAll('.product-id').forEach(span => {
+            span.textContent = span.textContent.substring(0, 10);
+        });
+
         function search() {
             // Get the search input value
             const searchInput = document.getElementById('searchInput').value.toLowerCase();

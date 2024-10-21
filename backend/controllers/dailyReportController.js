@@ -18,67 +18,6 @@ const getDailyReport = async (req, res) => {
     }
 };
 
-/* Route for decrementing the reportCollection and
-at the same time returning the decremented values 
-to the itemCollection*/
-const editSubtractedQuantity = async (req, res) => {
-    const userId = req.user.id;
-    const userName = req.body.userName;
-    const productName = req.body.productName;
-    const quantityValue = req.body.quantityValue;
-
-    try {
-        const report = await reportCollection.findOne({ userId: userId });
-        // Find the index of the product in the report
-        const productIndex = report.productAccessed.findIndex(product => product.product === productName);
-        
-        if (productIndex !== -1) {
-            report.productAccessed[productIndex].quantitySubtracted -= quantityValue;
-            
-            if (report.productAccessed[productIndex].quantitySubtracted === 0) {
-                report.productAccessed.splice(productIndex, 1);
-            }
-
-            await report.save();
-
-            // Check for existing log entry
-            const existingLog = await changeLog.findOne({
-                userName,
-                product: productName,
-                action: 'undid',
-                createdAt: { $gte: new Date(new Date() - 5 * 1000) } // Check if createdAt is within the last 5 seconds
-            });
-
-            if (existingLog) {
-                // If an existing log entry exists within the last 5 seconds, update the count
-                await changeLog.updateOne({ _id: existingLog._id }, { $inc: { count: quantityValue } });
-            } else {
-                // Create a new log entry
-                await changeLog.create({
-                    userName,
-                    role: 'user', // Set role to 'user'
-                    action: 'undid', // Set action to 'undid'
-                    product: productName,
-                    count: quantityValue, // Increment count by one
-                    createdAt: new Date() // Set the current date
-                });
-            }
-
-            await itemCollection.updateOne(
-                { product: productName },
-                {$inc: {quantity: quantityValue}} 
-            )
-
-            res.status(200).send('Quantity subtracted successfully');
-        } else {
-            res.status(404).send('Product not found in report');
-        }
-    } catch (error) {
-        console.error(`Error subtracting quantity: ${error}`);
-        res.status(500).send('An error occurred while subtracting quantity');
-    }
-};
-
 //Handle sending the report
 const sendReport = async (req, res) => {
     const userId = req.user.id;
@@ -139,4 +78,4 @@ const sendReport = async (req, res) => {
     }
 };
 
-module.exports = { getDailyReport, editSubtractedQuantity, sendReport };
+module.exports = { getDailyReport, sendReport };

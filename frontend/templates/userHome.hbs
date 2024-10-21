@@ -11,8 +11,17 @@
     <header>
         <nav class="navbar">
             <div class="brand">
-                <a href="/goHomeAdmin" style="font-family: 'Roboto', sans-serif;">Stack Inventory - USER : Home</a>
+                <a href="/goHomeUser" style="font-family: 'Roboto', sans-serif;">Stack Inventory - USER : Home</a>
             </div>
+            <ul class="category-menu">
+                <li data-category="breakfast"><a href="#">Breakfast</a></li>
+                <li data-category="condiments"><a href="#">Condiments</a></li>
+                <li data-category="drinks"><a href="#">Drinks</a></li>
+                <li data-category="fruits"><a href="#">Fruits</a></li>
+                <li data-category="kitchen aid"><a href="#">Kitchen Aid</a></li>
+                <li data-category="resto"><a href="#">Resto</a></li>
+                <li data-category="vegetables"><a href="#">Vegetables</a></li>
+            </ul>
             <ul class="navbar-menu">
                 <li>Welcome, <strong style="color: #4C43A2;">{{user.name}}</strong></li>
                 <li><a href="/aboutUser">About</a></li>
@@ -24,42 +33,44 @@
     <aside>
         <ul>
             <li><img src="Casanas Suites.png" alt="Casanas Suites Logo"></li>
-            <li class="dropdown-toggle">
-                <a href="/goHomeUser">Home</a>
-                <!-- Arrow icon for dropdown -->
-                <span class="arrow-down"></span>
-                <!-- Dropdown menu -->
-                <ul class="dropdown-menu">
-                    <li data-category="breakfast"><a href="#">Breakfast</a></li>
-                    <li data-category="condiments"><a href="#">Condiments</a></li>
-                    <li data-category="drinks"><a href="#">Drinks</a></li>
-                    <li data-category="fruits"><a href="#">Fruits</a></li>
-                    <li data-category="kitchen aid"><a href="#">Kitchen Aid</a></li>
-                    <li data-category="resto"><a href="#">Resto</a></li>
-                    <li data-category="vegetables"><a href="#">Vegetables</a></li>
-                </ul>
-            </li>
+            <li><a href="/goHomeUser">Home</a></li>
             <li><a href="/dailyReport">Daily Report Tab</a></li>
             <li><a href="/reportView">Report Submitted</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/userLogout">Logout</a></li>
         </ul>
     </aside>
 
     <div class="controlPanel">
         <ul name="items" id="items" class="items">
-            <div class="item-container" >
+            <div class="item-container">
                 {{#each itemCollection}}
-                <li value="{{this.product}}" class="item" data-product="{{this.product}}">
+                <li value="{{this.product}}" class="item" data-product="{{this.product}}" data-id="{{this._id}}" data-picture="{{this.picture}}" data-quantity="{{this.quantity}}" data-maxquantity="{{this.maxQuantity}}" data-unit="{{this.unit}}">
                     <img class="productImage" src="{{this.picture}}" alt="{{this.product}}">
-                    <span class="itemName">{{this.product}}</span>
+                    <span class="itemName">{{this.product}}</span><br>
                     <span class="itemQuantity">{{this.quantity}}/{{this.maxQuantity}}</span>
                     <span class="itemUnit">{{this.unit}}</span>
-                    <input type="number" id="quantityInput" placeholder="Enter quantity" class="quantity-input" data-unit="{{this.unit}}" min="1">
-                    <button type="button" id="subtractQuantity" class="subtract-quantity" data-product="{{this.product}}" data-unit="{{this.unit}}">&minus;</button> <!--&minus; is as HTML entity for 'minus sign'-->
                 </li>
                 {{/each}}
             </div>
         </ul>
+    </div>
+
+    <!-- The Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img id="modalImage" class="productImage" src="" alt="">
+            <p><strong>Product ID:</strong> <span id="modalId"></span></p>
+            <p><strong>Product Name:</strong> <span id="modalName"></span></p>
+            <p><strong>Quantity:</strong> <span id="modalQuantity"></span></p>
+            <p><strong>Unit:</strong> <span id="modalUnit"></span></p>
+            <div class="input-container">
+                <input type="number" id="quantityInput" placeholder="Enter quantity" class="quantity-input" data-unit="{{this.unit}}" min="0">
+            </div>
+            <div class="button-container">
+                <button type="button" id="subtractQuantity" class="subtract-quantity" data-id="{{this._id}}" data-unit="{{this.unit}}">REDUCE</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -77,26 +88,24 @@
                     const itemElement = document.createElement('li');
                     itemElement.value = item.product;
                     itemElement.className = 'item';
-                    itemElement.setAttribute('data-product', item.product);
+                    itemElement.setAttribute('data-id', item._id); // Correctly set the data-id
+                    itemElement.setAttribute('data-product', item.product); // Ensure the name is correctly captured
                     itemElement.innerHTML = `
                         <img class="productImage" src="${item.picture}" alt="${item.product}">
-                        <span class="itemName">${item.product}</span>
+                        <span class="itemName">${item.product}</span><br>
                         <span class="itemQuantity">${item.quantity}/${item.maxQuantity}</span>
                         <span class="itemUnit">${item.unit}</span>
-                        <input type="number" id="quantityInput" placeholder="Enter quantity" class="quantity-input" data-unit="${item.unit}" min="1">
-                        <button type="button" class="subtract-quantity" data-product="${item.product}" data-unit="${item.unit}">&minus;</button>
                     `;
                     itemsContainer.appendChild(itemElement);
                 });
-                // Call toggleInputVisibility after rendering items
-                toggleInputVisibility();
+
             } catch (error) {
                 console.error(`Error fetching items: ${error}`);
             }
         };
 
-        // Add event listener to the dropdown menu items
-        document.querySelectorAll('.dropdown-menu li').forEach(item => {
+        // Add event listener to the category menu items
+        document.querySelectorAll('.category-menu li').forEach(item => {
             item.addEventListener('click', async () => {
                 const category = item.dataset.category;
                 fetchItemsByCategory(category);
@@ -116,66 +125,115 @@
         // Call the fetch NearDepletionItems function when the page loads
         document.addEventListener("DOMContentLoaded", fetchNearDepletionItems);
 
-        document.addEventListener("DOMContentLoaded", () => {
-            let currentQuantity;
-            const itemsContainer = document.querySelector('.item-container');
+        // Function to handle the confirmation prompt
+        const handleConfirmation = (action, callback) => {
+            const confirmationMessage = `Are you sure you want to ${action} the selected item?`;
+            if (confirm(confirmationMessage)) {
+                callback(); // If confirmed, proceed with the add or subtract action
+            } else {
+                console.log(`${action} action canceled`);
+            }
+        };
 
-            // Add event listener to the "subtract quantity" buttons for each item.
-            itemsContainer.addEventListener('click', async (event) => {
+        document.addEventListener("DOMContentLoaded", () => {
+        const itemsContainer = document.querySelector('.item-container');
+
+            // Event delegation to handle "add quantity" and "subtract quantity" button clicks
+            document.querySelector('.modal-content').addEventListener('click', async (event) => {
                 const target = event.target;
 
-                // Check if the clicked element is a button with the class 'subtract-quantity'
-                if (target.classList.contains('subtract-quantity')) {
-                    const selectedProduct = target.getAttribute('data-product');
-                    const unitInfo = target.getAttribute('data-unit');
-                    const quantityInput = target.parentElement.querySelector('.quantity-input');
-                    const quantityValue = parseInt(quantityInput.value) || 1; // Get the value from the input field
+                if (target.id === 'subtractQuantity') {
+                    const selectedProductId = target.getAttribute('data-id');
+                    const selectedProduct = document.getElementById('modalName').textContent;
+                    const unitInfo = document.getElementById('modalUnit').textContent;
+                    const quantityInput = document.getElementById('quantityInput');
+                    const quantityValue = parseInt(quantityInput.value);
 
-                    // Ensure a product is selected
-                    if (!selectedProduct) {
+                    // Ensure a product is selected and the quantity input has a valid value
+                    if (!selectedProductId) {
                         console.error("No product selected");
                         return;
                     }
 
-                    try {
-                        // Decrement the quantity by the input value in the database.
-                        const response = await fetch(`/userHome/subtractQuantity?product=${selectedProduct}&quantity=${quantityValue}&unit=${unitInfo}`);
-                        const data = await response.json();
-
-                        if (data.success) {
-                            // Update the quantity display with the new quantity.
-                            currentQuantity = data.quantity;
-                            const quantityDisplay = target.parentElement.querySelector('.itemQuantity');
-                            quantityDisplay.textContent = `${currentQuantity}/${data.maxQuantity}`;
-                            console.log(`Quantity for ${selectedProduct} deducted successfully`);
-                        } else {
-                            console.error(`Failed to deduct quantity: ${data.message}`);
-                        }
-                    } catch (error) {
-                        console.error(`Error reducing quantity: ${error}`);
+                    if (!quantityValue || quantityValue <= 0) {
+                        console.error("Invalid quantity value");
+                        return;
                     }
+
+                    const action = target.id === 'addQuantity' ? 'add' : 'reduce';
+
+                    handleConfirmation(action, async () => {
+                        try {
+                            let response;
+                            if (action === 'reduce') {
+                                // Decrement the quantity by the input value in the database
+                                response = await fetch(`/userHome/subtractQuantity?id=${selectedProductId}&quantity=${quantityValue}&product=${encodeURIComponent(selectedProduct)}&unit=${encodeURIComponent(unitInfo)}&productId=${selectedProductId}`);
+                            }
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                // Update the quantity display with the new quantity
+                                const itemElement = itemsContainer.querySelector(`[data-id="${data.productId}"]`);
+                                const quantityDisplay = itemElement.querySelector('.itemQuantity');
+                                quantityDisplay.textContent = `${data.quantity}/${data.maxQuantity}`;
+                                console.log(`Quantity for ${selectedProductId} updated successfully`);
+                                
+                                // Hide the modal after successful update
+                                document.getElementById('itemModal').style.display = 'none';
+                            } else {
+                                console.error(`Failed to update quantity: ${data.message}`);
+                            }
+                        } catch (error) {
+                            console.error(`Error updating quantity: ${error}`);
+                        }
+                    });
                 }
             });
-    });
-
-    // Function to toggle input visibility based on unit type
-    const toggleInputVisibility = () => {
-        // Remove the unit parameter from the function definition
-        const inputs = document.querySelectorAll('.quantity-input');
-        inputs.forEach(input => {
-            // Change 'document' to 'input' and fix the attribute name to 'dataset.unit'
-            const unit = input.dataset.unit;
-            input.style.display = unit === 'grams' || unit === 'milliliters' ? 'block' : 'none';
         });
+
+    // Function to show modal with item details
+    const showModal = (product) => {
+        document.getElementById('modalImage').src = product.picture;
+        document.getElementById('modalId').textContent = product._id.slice(0, 10); // Ensure _id is correctly shown
+        document.getElementById('modalName').textContent = product.name;
+        document.getElementById('modalQuantity').textContent = `${product.quantity}/${product.maxQuantity}`;
+        document.getElementById('modalUnit').textContent = product.unit;
+
+        // Set the data-id attribute on the "REDUCE" button
+        document.getElementById('subtractQuantity').setAttribute('data-id', product._id);
+
+        // Clear the input value
+        document.getElementById('quantityInput').value = '';
+
+        document.getElementById('itemModal').style.display = 'block';
     };
 
-    // Call toggleInputVisibility on page load
-    toggleInputVisibility();
+    // Close modal when clicking on the close button or outside of the modal
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('itemModal').style.display = 'none';
+    });
 
-    // Add event listener for the dropdown toggle
-    document.querySelector('.dropdown-toggle').addEventListener('click', function() {
-        // Toggle active class to show/hide the dropdown menu
-        this.classList.toggle('active');
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('itemModal')) {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+    });
+
+    // Add click event listener to item elements to show modal
+    document.querySelector('.item-container').addEventListener('click', (event) => {
+        if (event.target.closest('.item')) {
+            const itemElement = event.target.closest('.item');
+            const product = {
+                picture: itemElement.querySelector('.productImage').src,
+                _id: itemElement.getAttribute('data-id'), // Correctly capture _id
+                name: itemElement.getAttribute('data-product'),
+                quantity: itemElement.querySelector('.itemQuantity').textContent.split('/')[0],
+                maxQuantity: itemElement.querySelector('.itemQuantity').textContent.split('/')[1],
+                unit: itemElement.querySelector('.itemUnit').textContent
+            };
+            showModal(product);
+        }
     });
     </script>
 </body>

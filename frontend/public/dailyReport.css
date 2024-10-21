@@ -156,46 +156,39 @@ main {
 /* Styles for the table */
 table {
     width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
     background-color: #fff;
-    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-th, td {
-    border: 1px solid #ddd;
+thead th {
+    background-color: #DAC0A7;
+    color: #000;
     text-align: center;
-    font-size: x-large;
-    padding: 12px; /* Increased padding for better readability */
-    color: #333;
-    border-style: none;
-    border-radius: 5px;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-bottom: 2px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
 }
 
-th {
-    background-color: #f2f2f2;
+tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+    color: #000;
+    font-size: 16px;
+    border-right: 1px solid #e0e0e0;
 }
 
-tr:nth-child(even) {
+tbody tr:nth-of-type(even) {
     background-color: #f9f9f9;
 }
 
-.options-column {
-    position: relative;
-}
-
-.quantity-input {
-    display: block;
-    margin: 0 auto; /* Center horizontally */
-    padding: 5px; /* Add padding to make it visually appealing */
-    border: 1px solid #ccc; /* Add a border for clarity */
-    border-radius: 5px; /* Round the corners */
-    width: 150px; /* Set a fixed width */
-    margin-top: 10px; /* Add some space between elements */
-    margin-bottom: 10px;
-    font-size: 16px; /* Adjust font size */
-}
-
-.undoButtons {
-    z-index: 0;
+tbody tr:hover {
+    background-color: #f1f1f1;
 }
 
 /* CSS for the message */
@@ -207,7 +200,7 @@ tr:nth-child(even) {
     padding: 10px;
     background-color: #f2f2f2;
     border: 1px solid #ddd;
-    color: #f20000;
+    color: #2fa020;
     border-radius: 5px;
     font-size: x-large;
     font-weight: bold;

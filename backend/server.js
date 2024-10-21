@@ -9,7 +9,6 @@ const cookieParser = require("cookie-parser"); //package for making a cookie
 const fs = require('fs'); //required for data backup
 const open = require('opn');
 
-
 // Import environment variables
 const env = require('dotenv').config({path: path.resolve(__dirname, './.env')});
 
@@ -23,13 +22,17 @@ const itemPics = path.join(__dirname, './../frontend/uploads');
 const public = path.join(__dirname, './../frontend/public');
 
 // Import Middleware
-const { adminAuth, userAuth, checkAcc } = require('./routes/authMiddleware'); // importing authMiddleware.js file
+const { systemAdminAuth ,adminAuth, userAuth, checkAcc } = require('./routes/authMiddleware'); // importing authMiddleware.js file
 const { Collection } = require("mongoose");
 const { Console } = require("console");
 const { connectToMongoDB } = require('../backend/controllers/mongoConnect');
 
 // Import the collections from the database
 const { itemCollection } = require("../backend/models/ItemCollectionModel"); 
+const { reportCollection } = require('../backend/models/ReportCollectionModel');
+const { userCollection } = require('../backend/models/UserLoginModel');
+const { submittedReports } = require('../backend/models/SubmittedReportsModel');
+const { changeLog } = require('../backend/models/ChangeLogModel');
 
 // Setup middleware
 app.use(express.json());
@@ -47,6 +50,7 @@ app.get('*', checkAcc); //apply to all
 app.get("/",(req, res)=> { res.redirect("home") }); //default path of the web
 app.get("/home",(req, res)=> { res.render("home") });
 app.get("/chooseRole",(req, res)=> { res.render("chooseRole") });
+app.get("/systemAdminSignup",(req, res)=> { res.render("systemAdminSignup") });
 app.get("/adminSignup",(req, res)=> { res.render("adminSignup") });
 app.get("/userSignup",(req, res)=> { res.render("userSignup") });
 app.get("/login", (req, res) => { res.render("login") });
@@ -63,6 +67,7 @@ app.get('/contactAdmin', adminAuth, async(req, res)=>{ res.render('contactAdmin'
 app.get('/contactUser', userAuth, async(req, res)=>{ res.render('contactUser')});
 
 // Import and use routes
+const systemAdminHomeRoutes = require('./routes/systemAdminHomes');
 const adminHomeRoutes = require('./routes/adminHomes');
 const userHomeRoutes = require('./routes/userHomes');
 const statusRoutes = require('./routes/statuses');
@@ -70,6 +75,7 @@ const reportRoutes = require('./routes/reports');
 const reportUserRoutes = require('./routes/reportsUser');
 const needToBuyRoutes = require('./routes/needToBuy');
 const dailyReportRoutes = require('./routes/dailyReports');
+const systemAdminSignupRoutes = require('./routes/systemAdminSignups');
 const adminSignupRoutes = require('./routes/adminSignups');
 const userSignupRoutes = require('./routes/userSignups');
 const loginRoutes = require('./routes/logins');
@@ -77,6 +83,7 @@ const changeLogRoutes = require('./routes/changeLogs');
 const authAccRoutes = require('./routes/authenticateAcc');
 const resetPassRoutes = require('./routes/resetPass');
 
+app.use('/systemAdminHome', systemAdminAuth, systemAdminHomeRoutes);
 app.use('/adminHome', adminAuth, adminHomeRoutes);
 app.use('/userHome', userAuth, userHomeRoutes);
 app.use('/status', adminAuth, statusRoutes);
@@ -85,6 +92,7 @@ app.use('/reportView', userAuth, reportUserRoutes);
 app.use('/needToBuy', adminAuth, needToBuyRoutes);
 app.use('/changeLog', adminAuth, changeLogRoutes);
 app.use('/dailyReport', userAuth, dailyReportRoutes);
+app.use('/systemAdminSignup', systemAdminSignupRoutes);
 app.use('/adminSignup', adminSignupRoutes);
 app.use('/userSignup', userSignupRoutes);
 app.use('/login', loginRoutes);
@@ -127,6 +135,107 @@ app.get('/logout', async(req, res) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
     res.redirect('/'); //going back to home
+});
+
+app.get('/userLogout', userAuth, async (req, res) => {
+    try {
+        // Retrieve the user ID from the req.user object populated by userAuthMiddleware
+        const userId = req.user.id;
+
+        // Fetch the user from the database based on the userId
+        const user = await userCollection.findById(userId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const userName = user.name;  // Get user's name from the database
+
+        // Extract the report data from the collection
+        const reportData = await reportCollection.find({ userId: userId });
+
+        // If report data exists, extract only the productAccessed array
+        if (reportData && reportData.length > 0) {
+            const productAccessedData = reportData.map(report => report.productAccessed).flat();
+
+            // Get current date to ensure report is upserted for today's date
+            const currentDate = new Date().setHours(0, 0, 0, 0);
+
+            // Check if a report already exists for the current date
+            let report = await submittedReports.findOneAndUpdate(
+                {
+                    userId: userId,
+                    createdAt: { $gte: new Date(currentDate), $lt: new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)) }
+                },
+                { $setOnInsert: { userId: userId, userName: userName } },
+                { upsert: true, new: true }
+            );
+
+            if (!report) {
+                report = { reportData: [] };
+            }
+
+            // Loop through the productAccessedData and update reportData accordingly
+            for (const item of productAccessedData) {
+                // Check if productId already exists in the report
+                const existingItem = report.reportData.find(data => data.productId === item.productId);
+                if (existingItem) {
+                    // If it exists, increment the quantitySubtracted
+                    existingItem.quantitySubtracted += item.quantitySubtracted;
+                } else {
+                    // If it doesn't exist, push the new item into reportData
+                    report.reportData.push(item);
+                }
+            }
+
+            // Save the updated report back to the database
+            await submittedReports.updateOne(
+                { userId: userId, createdAt: { $gte: new Date(currentDate), $lt: new Date(new Date(currentDate).setDate(new Date(currentDate).getDate() + 1)) } },
+                { $set: { reportData: report.reportData } }
+            );
+
+            // Log the report submission
+            const existingLog = await changeLog.findOne({
+                userName,
+                action: 'sent',
+                createdAt: { $gte: new Date(new Date() - 5 * 1000) } // Check if createdAt is within the last 5 seconds
+            });
+
+            if (existingLog) {
+                // If an existing log entry exists within the last 5 seconds, update the count
+                await changeLog.updateOne({ _id: existingLog._id }, { $inc: { count: 1 } });
+            } else {
+                // Create a new log entry
+                await changeLog.create({
+                    userName,
+                    role: 'user', // Set role to 'user'
+                    action: 'sent',
+                    createdAt: new Date() // Set the current date
+                });
+            }
+
+            // Clear the report data from the temporary reportCollection after submission
+            await reportCollection.deleteOne({ userId: userId });
+
+            console.log('Report sent successfully for user:', userName);
+        }
+
+        // Clear cookies after sending the report
+        res.cookie('jwt', '', { maxAge: 1 }); // Deleting the JWT token
+        res.cookie('jwtUser', '', { maxAge: 1 }); // Deleting the user token
+        res.cookie('jwtSystemAdmin', '', { maxAge: 1 });
+
+        // Set cache control headers to prevent caching
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+
+        // Redirect to the home page after logout
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error during logout and report submission:', error);
+        res.status(500).send('Error during logout and report submission');
+    }
 });
 
 // async function to start the server and perform other setup tasks

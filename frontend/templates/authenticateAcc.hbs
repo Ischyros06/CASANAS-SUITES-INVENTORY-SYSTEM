@@ -7,43 +7,83 @@
     <link rel="stylesheet" href="/authenticateAcc.css">
 </head>
 <body>
-    <form>
+    <a href="/home" class="back-button">&lt; Back</a>
+
+    <form id="usernameForm">
         <div class="logo">
             <img src="/Casanas Suites.png" alt="Casanas Suites Logo">
         </div>
 
         <h2>Account Authentication</h2>
-        <label for="name">What is the <strong style="color: red;">Username</strong> of account that you want to change?</label>
+        <label for="name">What is the <strong style="color: red;">Username</strong> of the account that you want to change?</label>
         <input type="text" id="name" name="name" required>
         <div class="errorName"></div>
+        <button type="button" id="checkUsernameButton">Check Username</button>
+    </form>
+
+    <form id="questionsForm" style="display: none;">
         <h2>Questions:</h2>
-        <label for="question1">Question 1: What is your mother's maiden name?</label>
-        <input type="text" id="question1" name="question1" required>
-        <label for="question2">Question 2: What city were you born in?</label>
-        <input type="text" id="question2" name="question2" required>
-        <label for="question3">Question 3: What is your favorite food?</label>
-        <input type="text" id="question3" name="question3" required>
+        <div id="questionsContainer"></div>
         <div class="errorDetails"></div>
-        <button>Authenticate</button>
+        <button type="submit">Authenticate</button>
     </form>
 
     <script>
-        const form = document.querySelector('form');
+        const checkUsernameButton = document.getElementById('checkUsernameButton');
+        const usernameForm = document.getElementById('usernameForm');
+        const questionsForm = document.getElementById('questionsForm');
+        const questionsContainer = document.getElementById('questionsContainer');
         const errorName = document.querySelector('.errorName');
         const errorDetails = document.querySelector('.errorDetails');
 
-        form.addEventListener('submit', async (e) => {
+        checkUsernameButton.addEventListener('click', async () => {
+            errorName.textContent = ''; // Clear username error
+            questionsContainer.innerHTML = ''; // Clear previous questions
+
+            const name = usernameForm.name.value;
+
+            try {
+                const res = await fetch('/authenticateAcc/fetchQuestions', {
+                    method: 'POST',
+                    body: JSON.stringify({ name }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (res.status === 200) {
+                    const data = await res.json();
+                    questionsContainer.innerHTML = `
+                        <label for="question1">${data.question1}</label>
+                        <input type="text" id="question1" name="question1" required>
+                        <label for="question2">${data.question2}</label>
+                        <input type="text" id="question2" name="question2" required>
+                        <label for="question3">${data.question3}</label>
+                        <input type="text" id="question3" name="question3" required>
+                    `;
+                    questionsForm.style.display = 'block';
+                    usernameForm.name.disabled = true; // Disable the username input
+                    checkUsernameButton.style.display = 'none'; // Hide the "Check Username" button
+                } else if (res.status === 400) {
+                    const data = await res.json();
+                    errorName.textContent = data.error;
+                    questionsForm.style.display = 'none'; // Hide the questions
+                } else {
+                    throw new Error('Unexpected response from server');
+                }
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        });
+
+        questionsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            errorName.textContent = ''; // Clear username error
             errorDetails.textContent = '';
 
-            // get the values
-            const name = form.name.value;
-            const question1 = form.question1.value;
-            const question2 = form.question2.value;
-            const question3 = form.question3.value;
-            
+            const name = usernameForm.name.value;
+            const question1 = questionsForm.question1.value;
+            const question2 = questionsForm.question2.value;
+            const question3 = questionsForm.question3.value;
+
             try {
                 const res = await fetch('/authenticateAcc', {
                     method: 'POST',
@@ -53,20 +93,15 @@
 
                 if (res.status === 200) {
                     const data = await res.json();
-                    // Extract account data from the response
                     const accountName = data.account.name;
-                    // Handle successful authentication
                     window.location.href = `/resetPass?account=${encodeURIComponent(accountName)}`;
-                } else if (res.status === 400) {
-                    const data = await res.json();
-                    errorName.textContent = data.error;
                 } else if (res.status === 401) {
                     const data = await res.json();
                     errorDetails.textContent = data.error;
                 } else {
                     throw new Error('Unexpected response from server');
                 }
-            } catch (error){
+            } catch (error) {
                 console.error('Error authentication:', error);
             }
         });

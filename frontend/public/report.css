@@ -251,14 +251,78 @@ tbody tr:nth-child(even) {
     margin-top: 50px;
 }
 
-/* Styles for print */
-@media print {
-    body {
-        background-color: #fff; /* Change background color for printing */
-    }
+/* Hide the print header by default */
+.print-header {
+    display: none;
+}
 
-    aside,
-    button {
-        display: none; /* Hide the aside and the print button */
-    }
+@media print {
+  /* Hide everything else */
+body * {
+    visibility: hidden;
+}
+
+/* Show the print header only during printing */
+.print-header {
+    display: block;
+    position: static;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: white;
+    page-break-after: avoid;
+}
+
+.print-header .header-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.print-header .logo {
+    margin-right: 20px;
+    width: 100px;
+    height: auto;
+}
+
+.print-header .text-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.text-content {
+    text-align: left;
+}
+
+.print-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.print-header p {
+    margin: 5px 0 0 0;
+    font-size: 16px;
+}
+
+/* Ensure the currently opened report and its contents are visible */
+.report-details, .report-details * {
+    visibility: hidden;
+}
+
+/* Only the visible (expanded) report container should be visible */
+.report-block.show-report .report-details, .report-block.show-report .report-details * {
+    visibility: visible;
+}
+
+/* Ensure layout of the visible report stays in place */
+.report-block.show-report .report-details {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+/* Hide buttons or unwanted elements during printing */
+.open-file-btn, .navbar, aside {
+    display: none !important;
+}
 }

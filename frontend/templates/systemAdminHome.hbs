@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/systemAdminHome.css">
+    <title>Status</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <!--div class="brand">
+                <a href="/goHomeAdmin" style="font-family: 'Roboto', sans-serif;">Stack Inventory - SYSTEM ADMIN</a>
+            </div-->
+            <ul class="navbar-menu">
+                <li>Welcome, <strong style="color: #4C43A2;">{{systemAdmin.name}}</strong></li>
+                <!--li><a href="/aboutAdmin">About</a></li>
+                <li><a href="/contactAdmin">Contact</a></li-->
+            </ul>
+        </nav>
+    </header>
+
+    <aside>
+        <ul>
+            <li><img src="Casanas Suites.png" alt="Casanas Suites Logo"></li>
+            <!--li><a href="/goHomeAdmin">Home</a></li>
+            <li><a href="/status">Status</a></li>
+            <li><a href="/report">Reports</a></li>
+            <li><a href="/changeLog">Change logs</a></li>
+            <li><a href="/needToBuy">Restock List</a></li-->
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </aside>
+    
+    <main>
+        <div class="header">
+            <div>
+                <p>Item Count: {{accountCount}}</p>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search anything related...">
+                <button onclick="search()">Search</button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Account name</th>
+                    <th>Role</th>
+                    <th>1st Question</th>
+                    <th>1st Answer</th>
+                    <th>2nd Question</th>
+                    <th>2nd Answer</th>
+                    <th>3rd Question</th>
+                    <th>3rd Answer</th>
+                    <th>Approval</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each systemAdminAccounts}}
+                    <tr>
+                        <td>{{this._id}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.role}}</td>
+                        <td>{{this.question1}}</td>
+                        <td>{{this.answer1}}</td>
+                        <td>{{this.question2}}</td>
+                        <td>{{this.answer2}}</td>
+                        <td>{{this.question3}}</td>
+                        <td>{{this.answer3}}</td>
+                        <td>
+                            <button class="approval-btn" data-id="{{this._id}}" data-approved="{{this.isApproved}}">
+                                <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
+                            </button>
+                        </td>
+                    </tr>
+                {{/each}}
+                {{#each adminLogInRequests}}
+                    <tr>
+                        <td>{{this._id}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.role}}</td>
+                        <td>{{this.question1}}</td>
+                        <td>{{this.answer1}}</td>
+                        <td>{{this.question2}}</td>
+                        <td>{{this.answer2}}</td>
+                        <td>{{this.question3}}</td>
+                        <td>{{this.answer3}}</td>
+                        <td>
+                            <button class="approval-btn" data-id="{{this._id}}" data-approved="{{this.isApproved}}">
+                                <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
+                            </button>
+                        </td>
+                    </tr>
+                {{/each}}
+                {{#each userCollection}}
+                    <tr>
+                        <td>{{this._id}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.role}}</td>
+                        <td>{{this.question1}}</td>
+                        <td>{{this.answer1}}</td>
+                        <td>{{this.question2}}</td>
+                        <td>{{this.answer2}}</td>
+                        <td>{{this.question3}}</td>
+                        <td>{{this.answer3}}</td>
+                        <td>
+                            <button class="approval-btn" data-id="{{this._id}}" data-approved="{{this.isApproved}}">
+                                <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
+                            </button>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </main>
+    
+    <script>
+        function search() {
+            // Get the value entered in the search input
+            const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            // Get all table rows
+            const rows = document.querySelectorAll('tbody tr');
+
+            // Loop through each row
+            rows.forEach(row => {
+                // Initialize a variable to track whether the search term was found in any column
+                let found = false;
+
+                // Loop through each cell in the row
+                const cells = row.querySelectorAll('td');
+                cells.forEach(cell => {
+                    const text = cell.textContent.trim().toLowerCase();
+                    // Check if the search term is found in any cell
+                    if (text.includes(searchTerm)) {
+                        found = true;
+                    }
+                });
+
+                // Show or hide the row based on whether the search term was found
+                if (found) {
+                    row.style.display = ''; // Show row
+                } else {
+                    row.style.display = 'none'; // Hide row
+                }
+            });
+        }
+
+        document.querySelectorAll('.approval-btn').forEach(button => {
+            button.addEventListener('click', async function () {
+                const id = this.getAttribute('data-id');
+                let isApproved = this.getAttribute('data-approved') === 'true';
+
+                // Toggle the approval status
+                isApproved = !isApproved;
+
+                // Update the button's data-approved attribute
+                this.setAttribute('data-approved', isApproved);
+
+                // Update the button's image
+                const img = this.querySelector('img');
+                img.src = isApproved ? 'true.png' : 'false.png';
+                img.alt = isApproved;
+
+                // Send the updated approval status to the server
+                try {
+                    await fetch(`/systemAdminHome/updateApprovalStatus`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ id, isApproved })
+                    });
+                } catch (error) {
+                    console.error('Error updating approval status:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

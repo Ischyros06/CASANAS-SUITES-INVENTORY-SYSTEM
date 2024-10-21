@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', adminAuth, adminHomeController.renderAdminHome);
 router.get('/getQuantity', adminAuth, adminHomeController.getQuantity);
 router.get('/addQuantity', adminAuth, adminHomeController.addQuantity);
+router.get('/subtractQuantity', adminAuth, adminHomeController.subtractQuantity);
 
 // New route to fetch items by category
 router.get('/getItemsByCategory/:category', adminAuth, adminHomeController.getItemsByCategory);

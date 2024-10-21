@@ -1,5 +1,6 @@
 const { adminLogInRequests } = require('../models/AdminLoginModel');
 const { userCollection } = require('../models/UserLoginModel');
+const { systemAdminAccounts } = require('../models/SystemAdminLoginModel');
 const jwt = require("jsonwebtoken");
 
 const maxAge = 3 * 24 * 60 * 60; //jwt timer for expiration -- 3 days
@@ -8,6 +9,19 @@ const createToken = (id, secret) => {
     return jwt.sign({ id }, secret, {
         expiresIn: maxAge
     });
+};
+
+const loginSystemAdmin = async (name, password) => {
+    const systemAdmin = await systemAdminAccounts.findOne({ name });
+    if (!systemAdmin.isApproved) {
+        throw new Error("Your account is not approved yet. Please contact the master admin.");
+    }
+    const loginSuccess = await systemAdminAccounts.login(name, password);
+    if (!loginSuccess) {
+        throw new Error("Incorrect password.");
+    }
+    const token = createToken(systemAdmin._id, process.env.SYSTEM_ADMIN_JWT);
+    return { systemAdminId: systemAdmin._id, role: systemAdmin.role, token };
 };
 
 const loginAdmin = async (name, password) => {
@@ -36,4 +50,4 @@ const loginUser = async (name, password) => {
     return { userId: user._id, role: user.role, token };
 };
 
-module.exports = { loginAdmin, loginUser };
+module.exports = { loginSystemAdmin, loginAdmin, loginUser };

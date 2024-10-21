@@ -1,6 +1,7 @@
 const express = require('express');
 const { adminLogInRequests } = require('../models/AdminLoginModel');
 const { userCollection } = require('../models/UserLoginModel');
+const { systemAdminAccounts } = require('../models/SystemAdminLoginModel');
 
 const router = express.Router();
 
@@ -22,6 +23,15 @@ router.post('/', async (req, res) => {
 
         // Check if the name exists in user collection
         account = await userCollection.findOne({ name });
+        if (account) {
+            // Update the password
+            account.password = password;
+            await account.save();
+            return res.status(200).json({ success: true });
+        }
+
+        // Check if the name exists in system admin collection
+        account = await systemAdminAccounts.findOne({ name });
         if (account) {
             // Update the password
             account.password = password;

@@ -22,14 +22,60 @@
                 <button type="button" id="showPasswordButton" class="passwordBtn">Show</button>
             </div>
             <div class="errorPass"></div> <br>
+            <br>
+
             <p>This part is for authentication purposes.</p>
-            <p>(Please remember your answers!)</p> <br>
-            <label for="question1">Question 1: What is your mother's maiden name?</label>
-            <input type="text" id="question1" name="question1" required>
-            <label for="question2">Question 2: What city were you born in?</label>
-            <input type="text" id="question2" name="question2" required>
-            <label for="question3">Question 3: What is your favorite food?</label>
-            <input type="text" id="question3" name="question3" required>
+            <p>(Please remember your answers!)</p>
+            <br>
+
+            <label for="question1">Question 1</label>
+            <select id="question1" name="question1" required>
+                <option value="">Select a question...</option>
+                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                <option value="What city were you born in?">What city were you born in?</option>
+                <option value="What is your favorite food?">What is your favorite food?</option>
+                <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                <option value="What was the name of the street you grew up on?">What is the name of the street you grew up on?</option>
+                <option value="What is your favorite movie?">What is your favorite movie?</option>
+                <option value="What is your father's middle name?">What is your father's middle name?</option>
+                <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+                <option value="What is your favorite color?">What is your favorite color?</option>
+                <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+            </select>
+            <input type="text" id="answer1" name="answer1" required>
+
+            <label for="question2">Question 2</label>
+            <select id="question2" name="question2" required>
+                <option value="">Select a question...</option>
+                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                <option value="What city were you born in?">What city were you born in?</option>
+                <option value="What is your favorite food?">What is your favorite food?</option>
+                <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                <option value="What was the name of the street you grew up on?">What is the name of the street you grew up on?</option>
+                <option value="What is your favorite movie?">What is your favorite movie?</option>
+                <option value="What is your father's middle name?">What is your father's middle name?</option>
+                <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+                <option value="What is your favorite color?">What is your favorite color?</option>
+                <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+            </select>
+            <input type="text" id="answer2" name="answer2" required>
+
+            <label for="question3">Question 3</label>
+            <select id="question3" name="question3" required>
+                <option value="">Select a question...</option>
+                <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                <option value="What city were you born in?">What city were you born in?</option>
+                <option value="What is your favorite food?">What is your favorite food?</option>
+                <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                <option value="What was the name of the street you grew up on?">What is the name of the street you grew up on?</option>
+                <option value="What is your favorite movie?">What is your favorite movie?</option>
+                <option value="What is your father's middle name?">What is your father's middle name?</option>
+                <option value="What was the name of your elementary school?">What was the name of your elementary school?</option>
+                <option value="What is your favorite color?">What is your favorite color?</option>
+                <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+            </select>
+            <input type="text" id="answer3" name="answer3" required>
+
             <button>Signup</button>
         </form>
     </div>
@@ -67,13 +113,16 @@
             const name = form.name.value;
             const password = form.password.value;
             const question1 = form.question1.value;
+            const answer1 = form.answer1.value;
             const question2 = form.question2.value;
+            const answer2 = form.answer2.value;
             const question3 = form.question3.value;
+            const answer3 = form.answer3.value;
             
             try {
                 const res = await fetch('/userSignup', {
                     method: 'POST',     
-                    body: JSON.stringify({ name, password, question1, question2, question3 }),
+                    body: JSON.stringify({ name, password, question1, answer1, question2, answer2, question3, answer3 }),
                     headers: { 'Content-Type': 'application/json' }
                 });
 

@@ -1,11 +1,35 @@
 const { adminLogInRequests } = require('../models/AdminLoginModel');
 const { userCollection } = require('../models/UserLoginModel');
+const { systemAdminAccounts } = require('../models/SystemAdminLoginModel');
+
+// Route to fetch questions based on the username
+const fetchQuestions = async (req, res) => {
+    const { name } = req.body;
+
+    try {
+        let account = await adminLogInRequests.findOne({ name });
+        if (!account) {
+            account = await userCollection.findOne({ name });
+            if (!account) {
+                account = await systemAdminAccounts.findOne({ name });
+                if (!account) {
+                    return res.status(400).json({ error: "This username does not exist." });
+                }
+            }
+        }
+
+        const { question1, question2, question3 } = account;
+        res.status(200).json({ question1, question2, question3 });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 const compareAnswers = (storedAnswers, providedAnswers) => {
     let correctAnswerCount = 0;
 
     for (let i = 1; i <= 3; i++) {
-        if (storedAnswers[`question${i}`] === providedAnswers[`question${i}`]) {
+        if (storedAnswers[`answer${i}`] === providedAnswers[`question${i}`]) {
             correctAnswerCount++;
         }
     }
@@ -21,8 +45,10 @@ const resetPassAuth = async (req, res) => {
         if (!account) {
             account = await userCollection.findOne({ name });
             if (!account) {
-                // Respond with a 401 status code and an error message
-                return res.status(400).json({ error: "This username does not exist." });
+                account = await systemAdminAccounts.findOne({ name });
+                if (!account) {
+                    return res.status(400).json({ error: "This username does not exist." });
+                }
             }
         }
 
@@ -38,4 +64,4 @@ const resetPassAuth = async (req, res) => {
     }
 };
 
-module.exports = { resetPassAuth };
+module.exports = { fetchQuestions, resetPassAuth };

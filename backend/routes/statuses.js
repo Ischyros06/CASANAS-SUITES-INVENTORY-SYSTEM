@@ -46,9 +46,13 @@ router.post('/submitItem', upload.single('picture'), adminAuth, async (req, res)
 
         const newItem = await createItem(req.body, req.file);
 
+        // Extract the _id of the newly created item
+        const productId = newItem._id;
+
         // Check if there's an existing log entry within the last 5 seconds with the same userName and product
         const existingLog = await changeLog.findOne({
             userName: req.body.userName,
+            productId: productId,
             product: req.body.product,
             action: 'created',
             createdAt: { $gte: new Date(new Date() - 5 * 1000) } // Check if createdAt is within the last 5 seconds
@@ -63,6 +67,7 @@ router.post('/submitItem', upload.single('picture'), adminAuth, async (req, res)
                 userName: req.body.userName,
                 role: 'admin',
                 action: 'created',
+                productId: productId,
                 product: req.body.product,
                 maxLimit: req.body.maxQuantity, // Store maxQuantity in maxLimit
                 unit: req.body.unit,
@@ -118,6 +123,7 @@ router.post('/submitEdit/:id', adminAuth, async (req, res) => {
             // Check if there's an existing log entry within the last 5 seconds with the same userName and product
             const existingLog = await changeLog.findOne({
                 userName: req.body.userName,
+                productId: id,
                 product: req.body.product,
                 action: 'edited',
                 createdAt: { $gte: new Date(new Date() - 5 * 1000) } // Check if createdAt is within the last 5 seconds
@@ -132,6 +138,7 @@ router.post('/submitEdit/:id', adminAuth, async (req, res) => {
                     userName: req.body.userName,
                     role: 'admin',
                     action: 'edited',
+                    productId: id,
                     product: req.body.product,
                     maxLimit: req.body.maxQuantity, // Store maxQuantity in maxLimit
                     unit: req.body.unit,

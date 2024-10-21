@@ -4,6 +4,7 @@
   "description": "Inventory System Project",
   "main": "backend/server.js",
   "dependencies": {
+    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
@@ -19,6 +20,8 @@
     "open": "^10.1.0",
     "opn": "^6.0.0",
     "path": "^0.12.7",
+    "pdfkit": "^0.15.0",
+    "public-ip": "^6.0.2",
     "twilio": "^4.22.0"
   },
   "scripts": {

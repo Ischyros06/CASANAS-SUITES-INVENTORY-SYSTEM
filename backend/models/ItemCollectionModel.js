@@ -15,7 +15,7 @@ const ItemsModel = new mongoose.Schema({
     },
     unit: {
         type: String,
-        enum: ['grams', 'milliliters', 'pieces' ],
+        //enum: ['grams', 'milliliters', 'pieces' ],
         required: [true, 'Please enter the unit of measurement the item']
     },
     category: {

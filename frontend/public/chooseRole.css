@@ -7,23 +7,35 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    /*padding: 20px;  Added padding for smaller screens */
 }
 
 .logo img {
-    width: 150px;
+    width: 100%; /* Make logo responsive */
+    max-width: 150px; /* Set a maximum size for the logo */
     height: auto;
 }
 
 /* Container Styles */
 .container {
     background-color: #fff;
-    padding: 30px;
+    padding: 50px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    width: 100%; /* Make the container responsive */
+    max-width: 700px; /* Set a maximum width */
     text-align: center;
 }
 
+/* Flexbox for Buttons */
+.btn-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px; /* Optional, for spacing between buttons */
+    margin-top: 20px;
+}
+
+/* Back Button */
 .back-button {
     position: absolute;
     top: 15px;
@@ -31,10 +43,11 @@ body {
     background-color: #fff;
     color: #333;
     text-decoration: none;
-    font-size: 14px;
-    padding: 7px 15px;
+    font-size: 1rem; /* Use relative font size */
+    padding: 0.5rem 1rem;
     border: 1px solid #333;
     border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 .back-button:hover {
@@ -44,14 +57,15 @@ body {
 
 h1 {
     color: #333;
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem; /* Use rem for margins */
+    font-size: 1.5rem; /* Relative font size */
 }
 
 /* Button Styles */
 .btn {
     background-color: #67ada6;
     color: #fff;
-    padding: 15px 30px;
+    padding: 15px 50px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -66,10 +80,6 @@ h1 {
 
 .btn:hover {
     background-color: #43A298;
-}
-
-.btn + .btn {
-    margin-top: 20px;
 }
 
 /* Image Styles */
@@ -89,8 +99,36 @@ footer {
     bottom: 0;
     width: 100%;
     position: fixed;
+    font-size: 0.9rem; /* Relative font size */
 }
 
 footer a {
-    font-size: 14px;
+    font-size: 0.8rem; /* Adjust font size for links */
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+    .container {
+        width: 90%; /* Make container width responsive on smaller screens */
+    }
+    
+    .btn {
+        padding: 10px;
+        font-size: 0.9rem; /* Reduce font size for smaller screens */
+    }
+
+    h1 {
+        font-size: 1.3rem; /* Reduce font size for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .back-button {
+        font-size: 0.9rem; /* Reduce back button size on small screens */
+        padding: 5px 10px;
+    }
+
+    footer {
+        font-size: 0.7rem; /* Reduce footer font size on smaller screens */
+    }
 }

@@ -2,9 +2,10 @@ const express = require('express');
 const path = require("path");
 const env = require('dotenv').config({path: path.resolve(__dirname, '../.env')}); // Import environment variables
 const router = express.Router();
-const { loginAdmin, loginUser } = require('../controllers/loginController');
+const { loginSystemAdmin ,loginAdmin, loginUser } = require('../controllers/loginController');
 const { adminLogInRequests } = require('../models/AdminLoginModel');
 const { userCollection } = require('../models/UserLoginModel');
+const { systemAdminAccounts } = require('../models/SystemAdminLoginModel');
 
 const maxAge = 3 * 24 * 60 * 60; //jwt timer for expiration -- 3 days
 
@@ -13,9 +14,14 @@ router.post('/', async(req, res) => {
     const {name, password} = req.body;
     const admin = await adminLogInRequests.findOne({ name });
     const user = await userCollection.findOne({ name });
+    const system_admin =  await systemAdminAccounts.findOne({ name });
 
     try {
-        if(admin){
+        if(system_admin){
+            const { systemAdminId, role, token } = await loginSystemAdmin(name, password, res);
+            res.cookie('jwtSystemAdmin', token, { httpOnly: true, maxAge: maxAge * 1000 });
+            res.status(200).json({ systemAdmin: systemAdminId, role: role });
+        } else if (admin){
             const { adminId, role, token } = await loginAdmin(name, password, res);
             res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
             res.status(200).json({ admin: adminId, role: role });

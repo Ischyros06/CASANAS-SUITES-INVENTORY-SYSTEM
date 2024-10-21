@@ -27,7 +27,7 @@
             <li><a href="/goHomeUser">Home</a></li>
             <li><a href="/dailyReport">Daily Report Tab</a></li>
             <li><a href="/reportView">Report Submitted</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <li><a href="/userLogout">Logout</a></li>
         </ul>
     </aside>
 
@@ -35,17 +35,17 @@
         <div class="container">
             <!-- Message about data deletion at midnight -->
         <div class="message">
-            Note: The data shown here will be automatically deleted at midnight, so print or send it to the admin ASAP.
+            Note: When you logout the data will be sent to the admin, if not it will be automatically be sent by midnight.
             <!-- Countdown timer -->
             <div class="countdown" id="countdown"></div>
         </div>
 
-        <div class="clickButtons">
+        <!--div class="clickButtons">
             <button onclick="window.print()">Print Report</button>
             <button onclick="openConfirmationModal()">Send Report</button>
-        </div>
+        </div-->
 
-        <div id="confirmationModal" class="modal">
+        <!--div id="confirmationModal" class="modal">
             <div class="modal-content">
                 <span class="close" onclick="closeConfirmationModal()">&times;</span>
                 <p>Are you sure you want to send this report?</p>
@@ -56,27 +56,24 @@
                     <button onclick="closeConfirmationModal()">No</button>
                 </div>
             </div>
-        </div>
+        </div-->
 
         <table>
             <thead>
                 <tr>
+                    <th>Product ID</th>
                     <th>Product</th>
                     <th>Quantity Subtracted</th>
                     <th>Unit</th>
-                    <th class="options-column" >Options</th>
                 </tr>
             </thead>
             <tbody>
                 {{#each reportData}}
                     <tr>
+                        <td>{{this.productId}}</td>
                         <td>{{this.product}}</td>
                         <td>{{this.quantitySubtracted}}</td>
                         <td>{{this.unit}}</td>
-                        <td class="options-column">
-                            <input type="number" id="quantityInput" placeholder="Enter quantity" class="quantity-input" data-unit="{{this.unit}}" min="1">
-                            <button class="undoButtons" onclick="editSubtractedQuantity('{{this.product}}', event)">−</button>
-                        </td>
                     </tr>
                 {{/each}}
             </tbody>
@@ -86,8 +83,12 @@
     </main>
 
     <script>
+        document.querySelectorAll('td:nth-child(1)').forEach(td => {
+            td.textContent = td.textContent.substring(0, 10);
+        });
+
          // Function to open the confirmation modal
-        function openConfirmationModal() {
+        /*function openConfirmationModal() {
             const modal = document.getElementById('confirmationModal');
             modal.style.display = 'block';
         }
@@ -96,7 +97,7 @@
         function closeConfirmationModal() {
             const modal = document.getElementById('confirmationModal');
             modal.style.display = 'none';
-        }
+        }*/
 
         // Function to update countdown timer
         function updateCountdown() {
@@ -112,48 +113,22 @@
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
             // Update countdown display
-            document.getElementById('countdown').innerText = `Time until data deletion: ${hours}h ${minutes}m ${seconds}s`;
+            document.getElementById('countdown').innerText = `Time until data is sent: ${hours}h ${minutes}m ${seconds}s`;
         }
 
         // Call updateCountdown every second
         setInterval(updateCountdown, 1000);
 
-
-        /* This function is to undo the accidental decrimented items and get the value back to the original item inventory*/
-        function editSubtractedQuantity(productName, event) {
-            const userName = '{{user.name}}';
-            const quantityInput = event.target.parentNode.querySelector('.quantity-input').value; // Get the input value relative to the button
-            const quantityValue = parseInt(quantityInput) || 1;
-
-            fetch('/dailyReport/editSubtractedQuantity', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productName, userName, quantityValue })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to subtract quantity');
-                }
-                // Refresh the page to reflect the updated quantity subtracted
-                window.location.reload();
-            })
-            .catch(error => {
-                console.error('Error subtracting quantity:', error);
-                // Handle error
-            });
-        };
-
         /*This function is for sending the contents of the report to the schema that stores the reports submitted to the admin*/
-        function sendReport() {
+        /*function sendReport() {
             closeConfirmationModal();
             const userName = "{{user.name}}"; // Ensure that {{user.name}} is replaced with the actual user's name by your server-side templating engine
             const reportData = Array.from(document.querySelectorAll('tbody tr')).map(row => {
                 return {
-                    product: row.querySelector('td:nth-child(1)').textContent,
-                    quantitySubtracted: parseInt(row.querySelector('td:nth-child(2)').textContent),
-                    unit: row.querySelector('td:nth-child(3)').textContent
+                    productId: row.querySelector('td:nth-child(1)').textContent,
+                    product: row.querySelector('td:nth-child(2)').textContent,
+                    quantitySubtracted: parseInt(row.querySelector('td:nth-child(3)').textContent),
+                    unit: row.querySelector('td:nth-child(4)').textContent
                 };
             });
 
@@ -184,21 +159,7 @@
                 console.log(userName)
                 // Handle error
             });
-        };
-
-        // Function to toggle input visibility based on unit type
-        const toggleInputVisibility = () => {
-            // Remove the unit parameter from the function definition
-            const inputs = document.querySelectorAll('.quantity-input');
-            inputs.forEach(input => {
-                // Change 'document' to 'input' and fix the attribute name to 'dataset.unit'
-                const unit = input.dataset.unit;
-                input.style.display = unit === 'grams' || unit === 'milliliters' ? 'block' : 'none';
-            });
-        };
-
-        // Call toggleInputVisibility on page load
-        toggleInputVisibility();
+        };*/
     </script>
 </body>
 </html>

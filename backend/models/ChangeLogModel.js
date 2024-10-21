@@ -11,19 +11,25 @@ const changeLogSchema = new mongoose.Schema({
     },
     action: {
         type: String,
-        enum: [ 'edited', 'added', 'deducted', 'undid', 'created', 'sent'],
+        enum: [ 'edited', 'added', 'reduced', 'created', 'sent'],
         required: true
+    },
+    productId:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: function() {
+            return this.action === 'added' || this.action === 'reduced' || this.action === 'created' || this.action === 'edited';
+        }
     },
     product: {
         type: String,
         required: function() {
-            return this.action === 'added' || this.action === 'deducted'|| this.action === 'undid' || this.action === 'created' || this.action === 'edited';
+            return this.action === 'added' || this.action === 'reduced' || this.action === 'created' || this.action === 'edited';
         }
     },
-    count: { //this will be used only when the action is manipulated
+    amount: { //this will be used only when the action is manipulated
         type: Number,
         required: function() {
-            return this.action === 'added' || this.action === 'deducted'|| this.action === 'undid';
+            return this.action === 'added' || this.action === 'reduced';
         },
     },
     maxLimit: {

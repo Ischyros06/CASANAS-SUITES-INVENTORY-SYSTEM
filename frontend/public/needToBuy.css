@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
 
-/* Reset default margin and padding */
 * {
     margin: 0;
     padding: 0;
@@ -68,14 +67,14 @@ aside {
     background-color: #DAC0A7;
     border-radius: 10px;
     color: #fff;
-    width: 220px; /* Adjust width as needed */
+    width: 220px;
     height: 92vh;
     position: fixed;
     top: 0;
     left: 0;
-    overflow-y: auto; /* Add scroll if content exceeds height */
-    padding-top: 50px; /* Adjust padding for space above the content */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+    overflow-y: auto;
+    padding-top: 50px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     margin-left: 0.3%;
     margin-top: 3.6%;
 }
@@ -87,7 +86,7 @@ aside ul {
 
 aside ul li {
     margin-bottom: 15px;
-    transition: all 0.3s ease; /* Smooth transition for hover effect */
+    transition: all 0.3s ease;
     font-family: 'Montserrat', sans-serif;
     font-weight: bold;
 }
@@ -101,13 +100,13 @@ aside ul li a {
     color: #333;
     text-decoration: none;
     display: block;
-    padding: 10px 20px; /* Add padding for better clickability */
-    border-left: 3px solid transparent; /* Add border for left highlight */
+    padding: 10px 20px;
+    border-left: 3px solid transparent;
 }
 
 aside ul li a:hover {
-    background-color: rgba( 162, 114, 67, 0.5); /* Highlight on hover */
-    border-left-color: #43A298; /* Highlight border on hover */
+    background-color: rgba( 162, 114, 67, 0.5);
+    border-left-color: #43A298;
 }
 
 button {
@@ -128,7 +127,7 @@ button:hover {
 
 /* Main content styles */
 main {
-    margin-left: 220px; /* Adjust according to aside width */
+    margin-left: 220px;
     padding: 20px;
 }
 
@@ -140,54 +139,125 @@ main {
 table {
     width: 100%;
     background-color: #fff;
-    border-radius: 5px;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
 }
 
 th, td {
-    border: 1px solid #ddd;
-    text-align: center;
-    font-size: x-large;
-    padding: 12px; /* Increased padding for better readability */
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 14px;
     color: #333;
-    border-style: none;
-    border-radius: 5px;
+    border-bottom: 1px solid #ddd;
 }
 
 th {
     background-color: #f2f2f2;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #333;
+    font-size: 18px;
 }
 
-tr:nth-child(even) {
+tr:hover {
     background-color: #f9f9f9;
 }
 
-/* Styles for print */
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Hide the print header by default */
+.print-header {
+    display: none;
+}
+
 @media print {
     body {
-        background-color: #fff; /* Change background color for printing */
-    }
-
-    table {
-        width: 100%;
         background-color: #fff;
-    }
-
-    th, td {
-        border: 1px solid #ddd;
-        text-align: center;
-        padding: 12px; /* Increased padding for better readability */
-        color: #333;
     }
 
     header,
     aside,
     button {
-        display: none; /* Hide the aside and the print button */
+        display: none;
     }
 
     main {
-        margin-left: auto; /* Set margin-left to auto to center the contents */
-        margin-right: auto; /* Set margin-right to auto to center the contents */
-        width: 80%; /* Adjust width if needed */
+        margin-left: 20px;
+        margin-right: auto;
+        width: 80%;
+    }
+
+    .print-header {
+        display: block;
+        position: static;
+        width: 100%;
+        padding: 10px 20px;
+        background-color: white;
+        page-break-after: avoid;
+    }
+
+    .print-header .header-content {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .print-header .logo {
+        margin-right: 20px;
+        width: 100px;
+        height: auto;
+    }
+
+    .print-header .text-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .text-content {
+        text-align: left;
+    }
+
+    .print-header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .print-header p {
+        margin: 5px 0 0 0;
+        font-size: 16px;
+    }
+
+    table {
+        width: auto;
+        border-radius: 0;
+        box-shadow: none;
+        margin-top: 0; /* Added to remove any space above the table */
+        margin-left: 50px;
+    }
+
+    tr {
+        page-break-inside: avoid; /* Prevent rows from splitting across pages */
+        page-break-after: auto;
+    }
+
+    table + table {
+        page-break-before: always; /* Start subsequent tables on a new page */
+    }
+
+    th, td {
+        padding: 8px 10px;
+        padding-right: 50px;
+        font-size: 14px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-transform: uppercase;
+        color: #333;
+        font-size: 18px;
     }
 }

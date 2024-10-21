@@ -5,6 +5,7 @@ const reportsModel = new mongoose.Schema({
     userName: Object,
     productAccessed: [{
         _id: false,
+        productId: String,
         product: String,
         quantitySubtracted: Number,
         unit: String

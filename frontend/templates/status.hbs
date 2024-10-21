@@ -28,7 +28,7 @@
             <li><a href="/status">Status</a></li>
             <li><a href="/report">Reports</a></li>
             <li><a href="/changeLog">Change logs</a></li>
-            <li><a href="/needToBuy">Need to Buy</a></li>
+            <li><a href="/needToBuy">Restock List</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </aside>
@@ -95,6 +95,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Product</th>
                     <th>Quantity</th>
                     <th>Maximum Set</th>
@@ -109,6 +110,7 @@
             <tbody>
                 {{#each itemCollection}}
                     <tr>
+                        <td>{{this._id}}</td>
                         <td>{{this.product}}</td>
                         <td>{{this.quantity}}</td>
                         <td>{{this.maxQuantity}}</td>
@@ -130,6 +132,10 @@
     </main>
     
     <script>
+        document.querySelectorAll('td:nth-child(1)').forEach(td => {
+            td.textContent = td.textContent.substring(0, 10);
+        });
+
         function search() {
             // Get the value entered in the search input
             const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();

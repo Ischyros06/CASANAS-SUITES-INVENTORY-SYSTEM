@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/login.css">
 </head>
 <body>
+    <a href="/home" class="back-button">&lt; Back</a>
+
     <form>
         <div class="logo">
             <img src="/Casanas Suites.png" alt="Casanas Suites Logo">
@@ -83,6 +85,8 @@
                     // Check the role and redirect accordingly
                     if (data.role === "admin") {
                         location.assign('/adminHome');
+                    } else if (data.role === "system_admin") {
+                        location.assign('/systemAdminHome');
                     } else {
                         location.assign('/userHome');
                     }

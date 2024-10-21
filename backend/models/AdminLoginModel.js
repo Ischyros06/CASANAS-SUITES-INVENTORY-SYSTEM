@@ -26,15 +26,27 @@ const AdminLoginSchema = new mongoose.Schema({
     },
     question1:{
         type: String,
-        required: [true, 'Please answer']
+        required: true
+    },
+    answer1:{
+        type: String,
+        required: [true, 'Please provide an answer']
     },
     question2:{
         type: String,
-        required: [true, 'Please answer']
+        required: true
+    },
+    answer2:{
+        type: String,
+        required: [true, 'Please provide an answer']
     },
     question3:{
         type: String,
-        required: [true, 'Please answer']
+        required: true
+    },
+    answer3:{
+        type: String,
+        required: [true, 'Please provide an answer']
     }
 },
 {

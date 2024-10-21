@@ -28,12 +28,13 @@
             <li><a href="/status">Status</a></li>
             <li><a href="/report">Reports</a></li>
             <li><a href="/changeLog">Change logs</a></li>
-            <li><a href="/needToBuy">Need to Buy</a></li>
+            <li><a href="/needToBuy">Restock List</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </aside>
 
     <main>
+        <!-- Search bar and other elements for web view -->
         <div class="header">
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Search by user or date...">
@@ -41,34 +42,52 @@
             </div>
         </div>
 
+        <!-- Report content follows -->
         <div class="report-container">
             {{#each reportData}}
                 <div class="report-block">
                     <p><strong>Report by:</strong> {{this.userName}}</p>
                     <p><strong>Date:</strong> {{this.createdAt}}</p>
                     <button class="open-file-btn">Open file</button>
+                    
                     <div class="report-details" style="display: none;">
-                        <p class="account" ><strong>Account: {{this.userName}}</strong></p>
+                        <!-- Print header appears on the first page only -->
+                        <div class="print-header first-page-only">
+                            <div class="header-content">
+                                <img src="Casanas Suites.png" alt="Company Logo" class="logo">
+                                <div class="text-content">
+                                    <h1>Casanas Suites</h1>
+                                    <h2>Daily Report</h2>
+                                    <p>For Internal Use | Location: C Castro Road, Brgy. San Pedro, Puerto Princesa City, Palawan</p>
+                                    <p id="print-datetime"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="account"><strong>Account: {{this.userName}}</strong></p>
                         <p class="date"><strong>Date:</strong> {{this.createdAt}}</p>
                         <p><strong>Items:</strong></p>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each this.reportData}}
-                                <tr>
-                                    <td>{{this.product}}</td>
-                                    <td>{{this.quantitySubtracted}}</td>
-                                    <td>{{this.unit}}</td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product ID</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each this.reportData}}
+                                    <tr>
+                                        <td>{{this.productId}}</td>
+                                        <td>{{this.product}}</td>
+                                        <td>{{this.quantitySubtracted}}</td>
+                                        <td>{{this.unit}}</td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             {{/each}}
@@ -80,42 +99,39 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <div id="reportDetails"></div>
-            <button id="downloadBtn">Download Report</button>
-            <button onclick="window.print()">Print Report</button>
+            <!--button id="downloadBtn">Download Report</button-->
+            <button class="print-button">Print Report</button>
         </div>
     </div>
 
     <script>
-        function search() {
-        // Get the search input value
-        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        // Add current date and time to the print header
+        document.getElementById('print-datetime').textContent = `Printed on: ${new Date().toLocaleString()}`;
 
-        // Loop through each report block
-        const reportBlocks = document.querySelectorAll('.report-block');
-        reportBlocks.forEach(reportBlock => {
-            // Get the userName and createdAt values
-            const userName = reportBlock.querySelector('.account').innerText.toLowerCase();
-            const createdAt = reportBlock.querySelector('.date').innerText.toLowerCase();
-
-            // Check if the userName or createdAt matches the search input
-            if (userName.includes(searchInput) || createdAt.includes(searchInput)) {
-                reportBlock.style.display = 'block'; // Show the report block
-            } else {
-                reportBlock.style.display = 'none'; // Hide the report block
-            }
+        document.querySelectorAll('td:nth-child(1)').forEach(td => {
+            td.textContent = td.textContent.substring(0, 10);
         });
-    }
 
-        // Get the modal
+        // Search functionality
+        function search() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const reportBlocks = document.querySelectorAll('.report-block');
+            reportBlocks.forEach(reportBlock => {
+                const userName = reportBlock.querySelector('.account').innerText.toLowerCase();
+                const createdAt = reportBlock.querySelector('.date').innerText.toLowerCase();
+                if (userName.includes(searchInput) || createdAt.includes(searchInput)) {
+                    reportBlock.style.display = 'block';
+                } else {
+                    reportBlock.style.display = 'none';
+                }
+            });
+        }
+
+        // Modal functionality
         var modal = document.getElementById('reportModal');
-
-        // Get the button that opens the modal
         var btns = document.getElementsByClassName("open-file-btn");
-
-        // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
 
-        // When the user clicks the button, open the modal 
         for (var i = 0; i < btns.length; i++) {
             btns[i].onclick = function() {
                 var reportDetails = this.nextElementSibling.innerHTML;
@@ -124,69 +140,46 @@
             }
         }
 
-        // When the user clicks on <span> (x), close the modal
         span.onclick = function() {
             modal.style.display = "none";
+            resetAfterPrint(); // Hide the report details when modal is closed
         }
 
-        // When the user clicks anywhere outside of the modal, close it
         window.onclick = function(event) {
             if (event.target == modal) {
                 modal.style.display = "none";
+                resetAfterPrint(); // Hide the report details when clicking outside the modal
             }
         }
 
-        // Function to format and download the report file
-        function downloadReport(userName, createdAt) {
+        //This function might not be needed anymore
+        // Download functionality
+        /*function downloadReport(userName, createdAt) {
             fetch('/report/downloadTemp', {
                 method: 'GET',
-                headers: {
-                    // No need for Content-Type header for GET requests
-                }
             })
             .then(response => {
-                if (response.ok) {
-                    // If the response is successful, create a blob from the response content
-                    return response.json();
-                }
+                if (response.ok) return response.json();
                 throw new Error('Failed to fetch report template');
             })
             .then(({ reportContent, filename }) => {
-                // Create a blob from the report content
                 const blob = new Blob([reportContent], { type: 'text/plain' });
-                // Create a temporary link element
                 const link = document.createElement('a');
                 link.href = window.URL.createObjectURL(blob);
-                // Set the filename obtained from the response
                 link.download = filename;
-                // Trigger the download by simulating a click event on the link
                 link.click();
-                // Clean up the URL object
                 window.URL.revokeObjectURL(link.href);
             })
-            .catch(error => {
-                console.error('Error downloading report template:', error);
-            });
+            .catch(error => console.error('Error downloading report template:', error));
         }
 
-        // Get the modal
-        var modal = document.getElementById('reportModal');
-
-        // Get the download button
         var downloadBtn = document.getElementById('downloadBtn');
-
-        // When the download button is clicked, extract the report details and call the downloadReport function
         downloadBtn.onclick = function () {
-            // Get the report details only if the modal is open
             if (modal.style.display === "block") {
-                // Get the report details element
                 var reportDetails = document.querySelector('.report-details').textContent;
-                //console.log(reportDetails);
                 if (reportDetails) {
-                    // Get the userName and createdAt from reportDetails
                     var userName = reportDetails.split('Account: ')[1].split('\n')[0].trim();
                     var createdAt = reportDetails.split('Date: ')[1].split('\n')[0].trim();
-                    // Call the downloadReport function with the extracted details
                     downloadReport(userName, createdAt, reportDetails);
                 } else {
                     console.error("Report details not found.");
@@ -194,8 +187,52 @@
             } else {
                 console.error("Modal is not open.");
             }
+        }*/
+
+        // Toggle report visibility for printing
+        document.querySelectorAll('.open-file-btn').forEach((button, index) => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.report-block').forEach(block => {
+                    block.classList.remove('show-report');
+                    block.querySelector('.report-details').style.display = 'none';
+                });
+                const reportBlock = button.closest('.report-block');
+                const reportDetails = reportBlock.querySelector('.report-details');
+                reportBlock.classList.add('show-report');
+                reportDetails.style.display = 'block';
+            });
+        });
+
+        // Print only the opened report
+        function beforePrint() {
+            const openedReport = document.querySelector('.report-block.show-report');
+            if (openedReport) {
+                window.print();
+            } else {
+                alert('Reopen the file you want to print.');
+                modal.style.display = "none";
+            }
+        }
+
+        document.querySelector('.print-button').addEventListener('click', beforePrint);
+
+        // Hide all report details after printing or canceling print
+        window.addEventListener('afterprint', resetAfterPrint);
+        
+        // Reset visibility after canceling print (if user clicks outside print dialog)
+        window.addEventListener('focus', resetAfterPrint);
+
+        // Hide all report details when modal is closed or dismissed
+        function resetAfterPrint() {
+            document.querySelectorAll('.report-details').forEach(function(detail) {
+                detail.style.display = 'none';
+            });
+            document.querySelectorAll('.report-block').forEach(function(block) {
+                block.classList.remove('show-report');
+            });
         }
 
     </script>
+
 </body>
 </html>

@@ -11,6 +11,10 @@ const submittedReportsSchema = new mongoose.Schema({
     },
     reportData: [{
         _id: false,
+        productId: {
+            type: String,
+            required: true
+        },
         product: {
             type: String,
             required: true

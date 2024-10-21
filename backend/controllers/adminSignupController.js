@@ -8,7 +8,7 @@ const checkUsernameExists = async (name) => {
 
 // Function to handle admin account creation
 const createAdminAccount = async (req, res) => {
-    const { name, password, question1, question2, question3 } = req.body;
+    const { name, password, question1, answer1, question2, answer2, question3, answer3 } = req.body;
 
     try {
         const accExist = await checkUsernameExists(name);
@@ -16,7 +16,7 @@ const createAdminAccount = async (req, res) => {
         if (accExist) {
             res.status(400).json({ error: 'This username is already registered' });
         } else {
-            const admin = await adminLogInRequests.create({ name, password , question1, question2, question3 });
+            const admin = await adminLogInRequests.create({ name, password, question1, answer1, question2, answer2, question3, answer3 });
             res.status(201).json({ admin: admin._id });
         }
     } catch (error) {

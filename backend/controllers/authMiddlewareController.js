@@ -1,6 +1,24 @@
 const jwt = require('jsonwebtoken');
 const { userCollection} = require("../models/UserLoginModel"); 
 const { adminLogInRequests } =  require('../models/AdminLoginModel');
+const { systemAdminAccounts } = require('../models/SystemAdminLoginModel');
+
+const systemAdminAuthMiddleware = (req, res, next) => {
+    const token = req.cookies.jwtSystemAdmin;
+
+    if(token){
+        jwt.verify(token, process.env.SYSTEM_ADMIN_JWT, (err, decodedToken) =>{
+            if(err){
+                console.log(err.message);
+                res.redirect('/login');
+            }else{
+                next();
+            }
+        })
+    } else {
+        res.redirect('/login');
+    }
+};
 
 const adminAuthMiddleware = (req, res, next) => {
     const token = req.cookies.jwt;
@@ -38,10 +56,23 @@ const userAuthMiddleware =(req, res, next) => {
 };
 
 const checkAccountMiddleware = (req, res, next) => {
+    const systemAdminToken = req.cookies.jwtSystemAdmin;
     const adminToken = req.cookies.jwt;
     const userToken = req.cookies.jwtUser;
 
-    if (adminToken) {
+    if(systemAdminToken){
+        jwt.verify(systemAdminToken, process.env.SYSTEM_ADMIN_JWT, async (err, decodedToken) => {
+            if (err) {
+                console.log(err.message);
+                res.locals.systemAdmin = null;
+                next();
+            } else {
+                let systemAdmin = await systemAdminAccounts.findById(decodedToken.id);
+                res.locals.systemAdmin = systemAdmin;
+                next();
+            }
+        });
+    } else if (adminToken) {
         jwt.verify(adminToken, process.env.ADMIN_JWT, async (err, decodedToken) => {
             if (err) {
                 console.log(err.message);
@@ -72,4 +103,4 @@ const checkAccountMiddleware = (req, res, next) => {
     }
 };
 
-module.exports = { adminAuthMiddleware, userAuthMiddleware, checkAccountMiddleware };
+module.exports = { systemAdminAuthMiddleware, adminAuthMiddleware, userAuthMiddleware, checkAccountMiddleware };
