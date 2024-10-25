@@ -78,27 +78,6 @@ header {
     border-bottom-color: #43A298;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .category-menu {
-        justify-content: flex-start;
-    }
-
-    .navbar-menu {
-        justify-content: flex-end;
-        margin-top: 10px;
-    }
-
-    .brand {
-        margin-bottom: 10px;
-    }
-}
-
 /* Aside styles */
 aside {
     background-color: #DAC0A7;
@@ -315,4 +294,38 @@ button:hover {
 .modal-content p {
     text-align: left;
     margin-left: 25%;
+}
+
+@media (max-width: 1500px) {
+    .navbar-menu {
+        display: none;
+    }
+}
+
+@media (max-width: 1470px) {
+    aside {
+        margin-top: 4em;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1260px) {
+    .brand {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+    }
+
+    .category-menu li a {
+        padding: 10px 12px; /* Less padding for compact layout */
+        font-size: 0.9em; /* Slightly smaller font */
+    }
+    .category-menu {
+        gap: 8px; /* Reduce gap between items */
+    }
+}
+
+@media (max-width: 1030px) {
+    .brand {
+        display: none;
+    }
 }
