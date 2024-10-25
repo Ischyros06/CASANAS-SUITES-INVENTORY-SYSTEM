@@ -31,7 +31,29 @@ const updateApprovalStatus = async (req, res) => {
     }
 };
 
+// Function to delete an account
+const deleteAccount = async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        // Try deleting the account from each collection
+        const deletedSystemAdmin = await systemAdminAccounts.findByIdAndDelete(id);
+        const deletedAdmin = await adminLogInRequests.findByIdAndDelete(id);
+        const deletedUser = await userCollection.findByIdAndDelete(id);
+
+        if (deletedSystemAdmin || deletedAdmin || deletedUser) {
+            res.status(200).send({ success: true });
+        } else {
+            res.status(404).send({ success: false, message: "Account not found" });
+        }
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).send({ success: false });
+    }
+};
+
 module.exports = {
     renderSystemAdminHome,
     updateApprovalStatus,
+    deleteAccount,
 };

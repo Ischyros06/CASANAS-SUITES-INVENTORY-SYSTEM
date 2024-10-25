@@ -243,3 +243,16 @@ button:hover {
     width: auto;
     height: 35px;
 }
+
+.delete-btn {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
+.delete-btn img {
+    margin: 0;
+    width: auto;
+    height: 35px;
+}

@@ -57,6 +57,7 @@
                     <th>3rd Question</th>
                     <th>3rd Answer</th>
                     <th>Approval</th>
+                    <th>Deletion</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,6 +75,11 @@
                         <td>
                             <button class="approval-btn" data-id="{{this._id}}" data-approved="{{this.isApproved}}">
                                 <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
+                            </button>
+                        </td>
+                        <td>
+                            <button class="delete-btn">
+                                <img src="delete.png" alt="delete">
                             </button>
                         </td>
                     </tr>
@@ -94,6 +100,11 @@
                                 <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
                             </button>
                         </td>
+                        <td>
+                            <button class="delete-btn">
+                                <img src="delete.png" alt="delete">
+                            </button>
+                        </td>
                     </tr>
                 {{/each}}
                 {{#each userCollection}}
@@ -110,6 +121,11 @@
                         <td>
                             <button class="approval-btn" data-id="{{this._id}}" data-approved="{{this.isApproved}}">
                                 <img src="{{#if this.isApproved}}true.png{{else}}false.png{{/if}}" alt="{{this.isApproved}}">
+                            </button>
+                        </td>
+                        <td>
+                            <button class="delete-btn">
+                                <img src="delete.png" alt="delete">
                             </button>
                         </td>
                     </tr>
@@ -177,6 +193,40 @@
                     });
                 } catch (error) {
                     console.error('Error updating approval status:', error);
+                }
+            });
+        });
+
+        // Event listener for delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async function () {
+                const row = this.closest('tr');
+                const id = row.querySelector('td').textContent.trim(); // Get the ID from the first column
+
+                const confirmation = confirm("Are you sure you want to delete this account?");
+                if (confirmation) {
+                    try {
+                        // Send a delete request to the server
+                        const response = await fetch('/systemAdminHome/deleteAccount', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ id })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Remove the row from the table if the deletion was successful
+                            row.remove();
+                        } else {
+                            alert('Error: Account could not be deleted.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting account:', error);
+                        alert('An error occurred while trying to delete the account.');
+                    }
                 }
             });
         });

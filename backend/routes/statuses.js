@@ -1,8 +1,9 @@
 const express = require('express');
 const { adminAuth } = require('./authMiddleware');
 const { changeLog } = require('../models/ChangeLogModel');
-const { getAllItems, createItem, getItemById, updateItem, upload, backup, importDataToMongoDB } = require('../controllers/statusController');
+const { getAllItems, createItem, getItemById, updateItem, upload, backup, importDataToMongoDB, deleteItem } = require('../controllers/statusController');
 const { itemCollection } = require('../models/ItemCollectionModel');
+const { adminLogInRequests } = require('../models/AdminLoginModel');
 const path = require('path');
 
 const router = express.Router();
@@ -69,6 +70,7 @@ router.post('/submitItem', upload.single('picture'), adminAuth, async (req, res)
                 action: 'created',
                 productId: productId,
                 product: req.body.product,
+                amount: req.body.quantity,
                 maxLimit: req.body.maxQuantity, // Store maxQuantity in maxLimit
                 unit: req.body.unit,
                 category: req.body.category,
@@ -180,5 +182,48 @@ router.get('/importData', adminAuth, async (req, res) => {
         res.status(500).json({ message: 'Import failed' });
     }
 });
+
+// Route for deleting an item
+router.post('/delete/:id', adminAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Fetch the admin details using the decoded token
+        const admin = await adminLogInRequests.findById(req.user.id); // Use req.user.id from the decoded token
+        const item = await itemCollection.findById(id);
+
+        if (!admin) {
+            const errorMessage = encodeURIComponent('Admin not found');
+            return res.redirect(`/status/?errorMessage=${errorMessage}`);
+        }
+
+        const deletedItem = await deleteItem(id);
+
+        if (!deletedItem) {
+            const errorMessage = encodeURIComponent('Item not found or already deleted');
+            return res.redirect(`/status/?errorMessage=${errorMessage}`);
+        }
+
+        // Log the deletion in the changeLog
+        await changeLog.create({
+            userName: admin.name, // Log the authenticated user's userName
+            role: 'admin',
+            action: 'deleted',
+            productId: id,
+            product: deletedItem.product,
+            amount: item.quantity,
+            maxLimit: item.maxQuantity,
+            unit: item.unit,
+            category: item.category,
+            createdAt: new Date() // Set the current date
+        });
+
+        const successMessage = encodeURIComponent('Item deleted successfully');
+        return res.redirect(`/status`);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send({ message: error.message });
+    }
+});
+
 
 module.exports = router;

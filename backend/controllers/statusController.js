@@ -188,6 +188,10 @@ const importDataToMongoDB = async (backupFolder) => {
     }
 };
 
+const deleteItem = async (itemId) => {
+    return await itemCollection.findByIdAndDelete(itemId);
+};
+
 module.exports = {  
     getAllItems, 
     createItem,
@@ -195,5 +199,6 @@ module.exports = {
     updateItem, 
     upload, 
     backup,
-    importDataToMongoDB
+    importDataToMongoDB,
+    deleteItem
 };

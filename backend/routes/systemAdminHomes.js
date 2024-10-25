@@ -7,5 +7,6 @@ const router = express.Router();
 // Routes for system admin home page
 router.get('/', systemAdminAuth, systemAdminHomeController.renderSystemAdminHome);
 router.post('/updateApprovalStatus', systemAdminAuth, systemAdminHomeController.updateApprovalStatus);
+router.post('/deleteAccount', systemAdminAuth, systemAdminHomeController.deleteAccount);
 
 module.exports = router;
