@@ -63,26 +63,28 @@
                         <p class="account"><strong>Account: {{this.userName}}</strong></p>
                         <p class="date"><strong>Date:</strong> {{this.createdAt}}</p>
                         <p><strong>Items:</strong></p>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Product ID</th>
-                                    <th>Product</th>
-                                    <th>Quantity</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{#each this.reportData}}
-                                <tr>
-                                    <td>{{this.productId}}</td>
-                                    <td>{{this.product}}</td>
-                                    <td>{{this.quantitySubtracted}}</td>
-                                    <td>{{this.unit}}</td>
-                                </tr>
-                                {{/each}}
-                            </tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product ID</th>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each this.reportData}}
+                                    <tr>
+                                        <td>{{this.productId}}</td>
+                                        <td>{{this.product}}</td>
+                                        <td>{{this.quantitySubtracted}}</td>
+                                        <td>{{this.unit}}</td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             {{/each}}
@@ -94,12 +96,15 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <div id="reportDetails"></div>
-            <button id="downloadBtn">Download Report</button>
+            <!--button id="downloadBtn">Download Report</button-->
             <button onclick="window.print()">Print Report</button>
         </div>
     </div>
 
     <script>
+        // Add current date and time to the print header
+        document.getElementById('print-datetime').textContent = `Printed on: ${new Date().toLocaleString()}`;
+
         document.querySelectorAll('td:nth-child(1)').forEach(td => {
             td.textContent = td.textContent.substring(0, 10);
         });
@@ -145,7 +150,7 @@
         }
 
         // Download functionality
-        function downloadReport(userName, createdAt) {
+        /*function downloadReport(userName, createdAt) {
             fetch('/report/downloadTemp', {
                 method: 'GET',
             })
@@ -178,7 +183,7 @@
             } else {
                 console.error("Modal is not open.");
             }
-        }
+        }*/
 
         // Toggle report visibility for printing
         document.querySelectorAll('.open-file-btn').forEach((button, index) => {
